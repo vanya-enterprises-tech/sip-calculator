@@ -1,5 +1,13 @@
 import React, { useMemo } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
 import jsPDF from "jspdf";
 import * as XLSX from "xlsx";
 
@@ -23,14 +31,20 @@ export default function SIPCalculator() {
         corpus = corpus * (1 + monthlyRate) + currentSIP;
         invested += currentSIP;
       }
+
       rows.push({
         year: y,
         invested: Math.round(invested),
         value: Math.round(corpus),
       });
-      if (stepUpType === "percentage") currentSIP += (currentSIP * stepUpValue) / 100;
-      else currentSIP += stepUpValue;
+
+      if (stepUpType === "percentage") {
+        currentSIP += (currentSIP * stepUpValue) / 100;
+      } else {
+        currentSIP += stepUpValue;
+      }
     }
+
     return rows;
   }, [lumpsum, sip, years, rate, stepUpType, stepUpValue]);
 
@@ -39,11 +53,17 @@ export default function SIPCalculator() {
   const exportPDF = () => {
     const doc = new jsPDF();
     doc.text("SIP & Lumpsum Investment Report", 14, 16);
+
     let y = 30;
     data.forEach((row) => {
-      doc.text(`Year ${row.year}: Invested ₹${row.invested.toLocaleString()} | Value ₹${row.value.toLocaleString()}`, 14, y);
+      doc.text(
+        `Year ${row.year}: Invested ₹${row.invested.toLocaleString()} | Value ₹${row.value.toLocaleString()}`,
+        14,
+        y
+      );
       y += 8;
     });
+
     doc.save("sip-report.pdf");
   };
 
@@ -64,23 +84,38 @@ export default function SIPCalculator() {
           <Input label="Monthly SIP (₹)" value={sip} onChange={setSip} />
           <Input label="Years" value={years} onChange={setYears} />
           <Input label="Expected Return (%)" value={rate} onChange={setRate} />
+
           <div>
             <label className="text-sm">Annual Step-Up Type</label>
-            <select className="w-full border rounded p-2" value={stepUpType} onChange={(e) => setStepUpType(e.target.value)}>
+            <select
+              className="w-full border rounded p-2"
+              value={stepUpType}
+              onChange={(e) => setStepUpType(e.target.value)}
+            >
               <option value="percentage">Percentage</option>
               <option value="fixed">Fixed Amount</option>
             </select>
           </div>
-          <Input label={stepUpType === "percentage" ? "Step-Up %" : "Step-Up ₹"} value={stepUpValue} onChange={setStepUpValue} />
+
+          <Input
+            label={stepUpType === "percentage" ? "Step-Up %" : "Step-Up ₹"}
+            value={stepUpValue}
+            onChange={setStepUpValue}
+          />
         </div>
 
         <div className="grid md:grid-cols-3 gap-4 mt-6">
           <Card title="Total Invested" value={`₹${latest.invested.toLocaleString()}`} />
-          <Card title="Future Value" value={`₹${latest.value.toLocaleString()}`} highlight />
           <Card title="Returns" value={`₹${(latest.value - latest.invested).toLocaleString()}`} />
+          <Card
+            title="Future Value"
+            value={`₹${latest.value.toLocaleString()}`}
+            highlight
+          />
         </div>
 
         <h2 className="text-xl font-semibold mt-10 mb-4">Year-wise Growth</h2>
+
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>
@@ -95,11 +130,23 @@ export default function SIPCalculator() {
         </div>
 
         <div className="flex gap-4 mt-6">
-          <button onClick={exportPDF} className="px-4 py-2 rounded bg-gray-800 text-white">Export PDF</button>
-          <button onClick={exportExcel} className="px-4 py-2 rounded bg-green-600 text-white">Export Excel</button>
+          <button
+            onClick={exportPDF}
+            className="px-4 py-2 rounded bg-gray-800 text-white"
+          >
+            Export PDF
+          </button>
+          <button
+            onClick={exportExcel}
+            className="px-4 py-2 rounded bg-green-600 text-white"
+          >
+            Export Excel
+          </button>
         </div>
 
-        <p className="text-xs text-gray-500 mt-6">Disclaimer: Calculations are illustrative only.</p>
+        <p className="text-xs text-gray-500 mt-6">
+          Disclaimer: Calculations are illustrative only.
+        </p>
       </div>
     </div>
   );
@@ -109,7 +156,13 @@ function Input({ label, value, onChange }) {
   return (
     <div>
       <label className="text-sm">{label}</label>
-      <input type="number" min="0" className="w-full border rounded p-2" value={value} onChange={(e) => onChange(Number(e.target.value))} />
+      <input
+        type="number"
+        min="0"
+        className="w-full border rounded p-2"
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+      />
     </div>
   );
 }
